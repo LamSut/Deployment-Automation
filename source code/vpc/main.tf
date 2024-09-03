@@ -25,18 +25,18 @@ resource "aws_security_group" "security_group" {
   name = "my_security_group"
   description = "Public Security Group"
 
-  ingress = {
+  ingress {
     from_port = 22
     to_port = 22
     protocol = "tcp"
-    cidr_block = ["0.0.0.0/0"]
+    cidr_blocks = ["0.0.0.0/0"]
   }
 
-  egress = {
+  egress {
     from_port = 0
     to_port = 0
     protocol = "-1"
-    cidr_block = ["0.0.0.0/0"]
+    cidr_blocks = ["0.0.0.0/0"]
   }
 
 }

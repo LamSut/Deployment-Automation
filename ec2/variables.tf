@@ -1,7 +1,3 @@
-variable "security_group" {
-  
-}
+variable "security_group" {}
 
-variable "subnet" {
-  
-}
+variable "subnet" {}

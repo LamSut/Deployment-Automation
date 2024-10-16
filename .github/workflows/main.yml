@@ -3,7 +3,7 @@ name: Terraform AWS
 on:
   push:
     branches:
-      - master
+      - main
 
 jobs:
   tf_fmt:

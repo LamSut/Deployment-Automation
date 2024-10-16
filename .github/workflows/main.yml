@@ -38,22 +38,22 @@ jobs:
       - name: Create Terraform plan (optional)
         id: create-plan
         run: terraform plan -out=planfile
-        when: needs.validate.outputs == 'success'
+        if: needs.validate.outputs == 'success'
 
       - name: Upload plan for review (optional)
         uses: actions/upload-artifact@v3
         with:
           name: terraform-plan
           path: planfile
-        when: needs.create-plan.outputs == 'success'
+        if: needs.create-plan.outputs == 'success'
 
       - name: Apply Terraform changes (manual approval required)
         id: apply-changes
         run: terraform apply -input=false planfile
         needs: [validate, create-plan]
-        when: github.event.inputs.apply == 'true'
+        if: github.event.inputs.apply == 'true'
 
       - name: Destroy Terraform resources (manual approval required)
         id: destroy-resources
         run: terraform destroy --auto-approve
-        when: github.event.inputs.destroy == 'true'
+        if: github.event.inputs.destroy == 'true'

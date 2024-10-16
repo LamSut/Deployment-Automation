@@ -1,63 +1,89 @@
-name: Terraform Pipeline
+name: Terraform Workflow
 
 on:
-  workflow_dispatch:
-    inputs:
-      destroy:
-        description: Whether to destroy Terraform resources
-        required: true
-        type: boolean
-
-env:
-  AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-  AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-  AWS_DEFAULT_REGION: us-east-1
+  push:
+    branches: [ main ]
 
 jobs:
   terraform:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v3
-
-      - name: Install Terraform
-        uses: hashicorp/setup-terraform@v2
+      - uses: hashicorp/setup-terraform@v2  
         with:
-          terraform_version: latest 
+          terraform_version: ''>= 1.5.0'
 
-      - name: Cache Terraform modules
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Configure AWS credentials
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_KEY }}
+          AWS_DEFAULT_REGION: us-east-1
+        run: |
+          echo "AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID" >> $GITHUB_ENV
+          echo "AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY" >> $GITHUB_ENV
+
+      - name: Configure GitLab access token (optional)
+        if: ${{ needs.validate || needs.plan || needs.apply || needs.destroy }}
+        env:
+          TF_VAR_gitlab_token: ${{ secrets.GITLAB_ACCESS_TOKEN }}
+        run: |
+          echo "TF_VAR_gitlab_token=$TF_VAR_gitlab_token" >> $GITHUB_ENV
+
+      - name: Cache Terraform state
         uses: actions/cache@v3
         with:
-          path: ~/.terraform
-          key: ${{ runner.os }}-terraform-${{ hashFiles('.terraform') }}
+          path: .terraform
+          key: ${{ runner.os }}-terraform-${{ hashFiles('.terraform/backend.tf') }}
           restore-keys: |
             ${{ runner.os }}-terraform-
 
-      - name: Initialize Terraform
+      - name: Terraform Init
         run: terraform init
 
-      - name: Validate Terraform configuration
+      - name: Validate Terraform configuration (optional)
+        if: ${{ needs.validate }}
         run: terraform validate
 
       - name: Create Terraform plan (optional)
-        id: create-plan
-        run: terraform plan -out=planfile
-        if: needs.validate.outputs == 'success'
+        if: ${{ needs.plan }}
+        run: terraform plan -out="planfile"
 
-      - name: Upload plan for review (optional)
+      - name: Upload Terraform plan (optional)
+        if: ${{ needs.plan }}
         uses: actions/upload-artifact@v3
         with:
-          name: terraform-plan
+          name: planfile
           path: planfile
-        if: needs.create-plan.outputs == 'success'
 
-      - name: Apply Terraform changes (manual approval required)
-        id: apply-changes
-        run: terraform apply -input=false planfile
-        needs: [validate, create-plan]
-        if: github.event.inputs.apply == 'true'
+      - name: Apply Terraform changes (manual)
+        if: ${{ needs.apply }}
+        needs: [ validate, plan ] 
+        run: terraform apply -input=false "planfile"
 
-      - name: Destroy Terraform resources (manual approval required)
-        id: destroy-resources
+      - name: Destroy infrastructure (manual)
+        if: ${{ needs.destroy }}
         run: terraform destroy --auto-approve
-        if: github.event.inputs.destroy == 'true'
+
+jobs:
+  validate:
+    needs: terraform
+    outputs:
+      validate: true
+
+  plan:
+    needs: validate
+    outputs:
+      plan: true
+
+  apply:
+    needs: plan
+    outputs:
+      apply: true
+
+  destroy:
+    needs: apply
+    outputs:
+      destroy: true

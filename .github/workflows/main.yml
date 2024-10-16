@@ -5,8 +5,14 @@ on:
     branches: [main]
 
 jobs:
-  terraform-init:
+  validate:
     runs-on: ubuntu-latest
+
+    env:
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_KEY }}
+      AWS_DEFAULT_REGION: "us-east-1"
+
     steps:
       - uses: actions/checkout@v3
       - name: Use Terraform Cache
@@ -22,46 +28,85 @@ jobs:
         run: terraform --version
       - name: Initialize Terraform
         run: terraform init
-
-  terraform-validate:
-    needs: terraform-init
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
       - name: Terraform Validate
         run: terraform validate
 
-  terraform-plan:
-    needs: terraform-validate
+  plan:
     runs-on: ubuntu-latest
-    env:
-      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY }}
-      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_KEY }}
-      AWS_DEFAULT_REGION: "us-east-1"
-    steps:
-      - uses: actions/checkout@v3
-      - id: plan
-        name: Terraform Plan
-        run: terraform plan -out=planfile
-      - name: Upload Plan (Optional)
-        uses: actions/upload-artifact@v3
-        with:
-          name: planfile
-          path: planfile
-        if: success()
 
-  terraform-apply-destroy:
-    needs: terraform-plan
-    runs-on: ubuntu-latest
     env:
       AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY }}
       AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_KEY }}
       AWS_DEFAULT_REGION: "us-east-1"
+
     steps:
       - uses: actions/checkout@v3
+      - name: Use Terraform Cache
+        uses: actions/cache@v3
+        with:
+          path: ~/.terraform
+          key: ${{ runner.os }}-terraform-${{ hashFiles('**/.terraform.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-terraform-
+      - name: Install Terraform
+        uses: hashicorp/setup-terraform@v2
+      - name: Terraform Version
+        run: terraform --version
+      - name: Initialize Terraform
+        run: terraform init
+      - name: Terraform Plan
+        run: terraform plan -out=planfile
+
+  apply:
+    runs-on: ubuntu-latest
+
+    env:
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_KEY }}
+      AWS_DEFAULT_REGION: "us-east-1"
+
+    steps:
+      - uses: actions/checkout@v3
+      - name: Use Terraform Cache
+        uses: actions/cache@v3
+        with:
+          path: ~/.terraform
+          key: ${{ runner.os }}-terraform-${{ hashFiles('**/.terraform.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-terraform-
+      - name: Install Terraform
+        uses: hashicorp/setup-terraform@v2
+      - name: Terraform Version
+        run: terraform --version
+      - name: Initialize Terraform
+        run: terraform init
       - name: Apply Terraform (Manual)
         run: terraform apply -input=false planfile
         if: github.event.inputs.apply == 'true'
+
+  destroy:
+    runs-on: ubuntu-latest
+
+    env:
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_KEY }}
+      AWS_DEFAULT_REGION: "us-east-1"
+
+    steps:
+      - uses: actions/checkout@v3
+      - name: Use Terraform Cache
+        uses: actions/cache@v3
+        with:
+          path: ~/.terraform
+          key: ${{ runner.os }}-terraform-${{ hashFiles('**/.terraform.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-terraform-
+      - name: Install Terraform
+        uses: hashicorp/setup-terraform@v2
+      - name: Terraform Version
+        run: terraform --version
+      - name: Initialize Terraform
+        run: terraform init
       - name: Destroy Terraform (Manual)
         run: terraform destroy --auto-approve
         if: github.event.inputs.destroy == 'true'

@@ -60,7 +60,7 @@ jobs:
 
       - name: Apply Terraform changes (manual)
         if: ${{ needs.apply }}
-        needs: [ validate, plan ] 
+        needs: [validate, plan] 
         run: terraform apply -input=false "planfile"
 
       - name: Destroy infrastructure (manual)

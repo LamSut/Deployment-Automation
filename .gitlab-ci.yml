@@ -1,54 +1,63 @@
-image:
-  name: registry.gitlab.com/gitlab-org/gitlab-build-images:terraform
-  entrypoint:
-    - '/usr/bin/env'
-    - 'PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'
+name: Terraform Workflow
 
-variables:
-  TF_VAR_gitlab_token: ${GITLAB_ACCESS_TOKEN}
-  AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY}
-  AWS_SECRET_ACCESS_KEY : ${AWS_SECRET_KEY}
-  AWS_DEFAULT_REGION: "us-east-1"
+on:
+  push:
+    branches: [ main ]  
 
-cache:
-  paths:
-    - .terraform
+env:
+  AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+  AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+  AWS_DEFAULT_REGION: us-east-1 
 
-before_script:
-  - terraform --version
-  - terraform init
+jobs:
+  terraform:
+    runs-on: ubuntu-latest
 
-stages:
-  - validate
-  - plan
-  - apply
-  - destroy
+    steps:
+      - uses: actions/checkout@v3
 
-validate:
-  stage: validate
-  script:
-    - terraform validate
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@v2
+        with:
+          terraform_version: latest
 
-plan:
-  stage: plan
-  script:
-    - terraform plan -out="planfile"
-  dependencies:
-    - validate
-  artifacts:
-    paths:
-      - planfile
+      - name: Cache Terraform modules (optional)
+        uses: actions/cache@v3
+        with:
+          path: ~/.terraform/modules
+          key: ${{ runner.os }}-terraform-${{ hashFiles('.terraform') }}
+          restore-keys: |
+            ${{ runner.os }}-terraform-
 
-apply:
-  stage: apply
-  script:
-    - terraform apply -input=false "planfile"
-  dependencies:
-    - plan
-  when: manual
+      - name: Initialize Terraform
+        run: terraform init
 
-destroy: 
-  stage: destroy
-  script:
-    - terraform destroy --auto-approve
-  when: manual 
+      - name: Validate Terraform configuration
+        run: terraform validate
+
+      - name: Create Terraform plan (optional)
+        run: terraform plan -out=planfile
+        outputs: plan_file: planfile  
+
+      - name: Upload plan artifacts (optional)
+        uses: actions/upload-artifact@v3
+        with:
+          name: terraform-plan 
+          if: steps.plan.outputs.plan_file  
+          path: ${{ steps.plan.outputs.plan_file }}
+
+      - name: Apply Terraform changes (manual)
+        run: terraform apply planfile  
+        when: needs.apply
+
+      - name: Destroy infrastructure (manual)
+        run: terraform destroy --auto-approve
+        when: needs.destroy
+
+needs:
+  apply:
+    inputs:
+      - types: approval  
+  destroy:
+    inputs:
+      - types: approval

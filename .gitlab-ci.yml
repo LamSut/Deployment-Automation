@@ -53,11 +53,3 @@ jobs:
       - name: Destroy infrastructure (manual)
         run: terraform destroy --auto-approve
         needs: destroy
-
-needs:
-  apply:
-    inputs:
-      - types: approval
-  destroy:
-    inputs:
-      - types: approval

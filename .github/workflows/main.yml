@@ -1,0 +1,57 @@
+name: Terraform CI/CD
+
+on:
+  push:
+    branches: [ main ] 
+
+jobs:
+  terraform:
+    runs-on: ubuntu-latest  
+
+    env:
+      TF_VAR_gitlab_token: ${{ secrets.GITLAB_ACCESS_TOKEN }}
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_KEY }}
+      AWS_DEFAULT_REGION: "us-east-1"
+
+    steps:
+      - uses: actions/checkout@v3  
+
+      - name: Use Terraform Cache
+        uses: actions/cache@v3  
+        with:
+          path: ~/.terraform
+          key: ${{ runner.os }}-terraform-${{ hashFiles('**/.terraform.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-terraform-
+
+      - name: Install Terraform
+        uses: hashicorp/setup-terraform@v2 
+
+      - name: Terraform Version
+        run: terraform --version
+
+      - name: Initialize Terraform
+        run: terraform init
+
+      - name: Terraform Validate
+        run: terraform validate
+
+      - id: plan
+        name: Terraform Plan
+        run: terraform plan -out=planfile
+
+      - name: Upload Plan (Optional)
+        uses: actions/upload-artifact@v3  
+        with:
+          name: planfile
+          path: planfile
+        if: success() 
+
+      - name: Apply Terraform (Manual)
+        run: terraform apply -input=false planfile
+        if: github.event.inputs.apply == 'true' 
+
+      - name: Destroy Terraform (Manual)
+        run: terraform destroy --auto-approve
+        if: github.event.inputs.destroy == 'true' 

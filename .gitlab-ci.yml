@@ -2,12 +2,12 @@ name: Terraform Workflow
 
 on:
   push:
-    branches: [ main ]  
+    branches: [ main ]
 
 env:
   AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
   AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-  AWS_DEFAULT_REGION: us-east-1 
+  AWS_DEFAULT_REGION: us-east-1
 
 jobs:
   terraform:
@@ -37,27 +37,27 @@ jobs:
 
       - name: Create Terraform plan (optional)
         run: terraform plan -out=planfile
-        outputs: plan_file: planfile  
+        outputs: plan_file: planfile
 
       - name: Upload plan artifacts (optional)
         uses: actions/upload-artifact@v3
         with:
-          name: terraform-plan 
-          if: steps.plan.outputs.plan_file  
+          name: terraform-plan
+          if: steps.plan.outputs.plan_file
           path: ${{ steps.plan.outputs.plan_file }}
 
       - name: Apply Terraform changes (manual)
-        run: terraform apply planfile  
-        when: needs.apply
+        run: terraform apply planfile
+        needs: apply
 
       - name: Destroy infrastructure (manual)
         run: terraform destroy --auto-approve
-        when: needs.destroy
+        needs: destroy
 
 needs:
   apply:
     inputs:
-      - types: approval  
+      - types: approval
   destroy:
     inputs:
       - types: approval

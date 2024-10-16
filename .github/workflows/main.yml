@@ -66,24 +66,3 @@ jobs:
       - name: Destroy infrastructure (manual)
         if: ${{ needs.destroy }}
         run: terraform destroy --auto-approve
-
-jobs:
-  validate:
-    needs: terraform
-    outputs:
-      validate: true
-
-  plan:
-    needs: validate
-    outputs:
-      plan: true
-
-  apply:
-    needs: plan
-    outputs:
-      apply: true
-
-  destroy:
-    needs: apply
-    outputs:
-      destroy: true

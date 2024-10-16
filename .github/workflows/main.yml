@@ -1,25 +1,34 @@
-name: Terraform Pipeline
+name: Terraform Workflow
 
 on:
   push:
     branches: [ main ]
 
 env:
-  AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-  AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-  AWS_DEFAULT_REGION: "us-east-1"
+  global:
+    AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+    AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+    AWS_DEFAULT_REGION: us-east-1
 
 jobs:
-  validate:
+  setup-terraform:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
 
-      - name: Install Terraform
+      - name: Use HashiCorp Terraform action
         uses: hashicorp/setup-terraform@v2
+        with:
+          terraform_version: 1.3.x  
 
       - name: Initialize Terraform
         run: terraform init
+
+  validate:
+    runs-on: ubuntu-latest
+    needs: setup-terraform
+    steps:
+      - uses: actions/checkout@v3
 
       - name: Validate Terraform configuration
         run: terraform validate
@@ -30,20 +39,8 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - name: Install Terraform
-        uses: hashicorp/setup-terraform@v2
-
-      - name: Initialize Terraform
-        run: terraform init
-
       - name: Create Terraform plan
         run: terraform plan -out=planfile
-
-      - name: Upload planfile artifact
-        uses: actions/upload-artifact@v3
-        with:
-          name: planfile
-          path: planfile
 
   apply:
     runs-on: ubuntu-latest
@@ -51,32 +48,16 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - name: Install Terraform
-        uses: hashicorp/setup-terraform@v2
-
-      - name: Download planfile artifact
-        uses: actions/download-artifact@v3
-        with:
-          name: planfile
-          path: .
-
-      - name: Apply Terraform changes (manual approval required)
+      - name: Apply Terraform plan
         run: terraform apply -input=false planfile
         env:
-          TF_IN_AUTOMATION: true  # Discourage manual approval in production
-        if: github.event.inputs.apply  # Manual trigger
+          TF_IN_AUTOMATION: true
 
   destroy:
     runs-on: ubuntu-latest
-    needs: apply
+    needs: [ apply, ! main ]
     steps:
       - uses: actions/checkout@v3
 
-      - name: Install Terraform
-        uses: hashicorp/setup-terraform@v2
-
-      - name: Destroy Terraform resources (manual approval required)
+      - name: Destroy Terraform resources
         run: terraform destroy --auto-approve
-        env:
-          TF_IN_AUTOMATION: true  # Discourage manual approval in production
-        if: github.event.inputs.destroy  # Manual trigger

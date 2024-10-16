@@ -1,8 +1,12 @@
 name: Terraform Pipeline
 
 on:
-  push:
-    branches: [main]
+  workflow_dispatch:
+    inputs:
+      destroy:
+        description: Whether to destroy Terraform resources
+        required: true
+        type: boolean
 
 env:
   AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}

@@ -1,67 +1,59 @@
-name: Terraform CI/CD
+name: Terraform Pipeline
 
 on:
   push:
-    branches: [main]
+    branches: [ main ]
+
+env:
+  AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+  AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+  AWS_DEFAULT_REGION: us-east-1
 
 jobs:
-  validate:
+  terraform:
     runs-on: ubuntu-latest
-    env:
-      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY }}
-      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_KEY }}
-      AWS_DEFAULT_REGION: "us-east-1"
+
     steps:
       - uses: actions/checkout@v3
-      - name: Use Terraform Cache
+
+      - name: Install Terraform
+        uses: hashicorp/setup-terraform@v2
+        with:
+          terraform_version: 1.9.0 
+
+      - name: Cache Terraform modules
         uses: actions/cache@v3
         with:
           path: ~/.terraform
-          key: ${{ runner.os }}-terraform-${{ hashFiles('**/.terraform.lock') }}
+          key: ${{ runner.os }}-terraform-${{ hashFiles('.terraform') }}
           restore-keys: |
             ${{ runner.os }}-terraform-
-      - name: Install Terraform
-        uses: hashicorp/setup-terraform@v2
-      - name: Terraform Version
-        run: terraform --version
+
       - name: Initialize Terraform
         run: terraform init
-      - name: Terraform Validate
+
+      - name: Validate Terraform configuration
         run: terraform validate
 
-  plan:
-    needs: validate
-    runs-on: ubuntu-latest
-    env:
-      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY }}
-      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_KEY }}
-      AWS_DEFAULT_REGION: "us-east-1"
-    steps:
-      - uses: actions/checkout@v3
-      - name: Terraform Plan
+      - name: Create Terraform plan (optional)
+        id: create-plan
         run: terraform plan -out=planfile
+        when: needs.validate.outputs == 'success' 
 
-  apply:
-    needs: plan
-    runs-on: ubuntu-latest
-    env:
-      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY }}
-      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_KEY }}
-      AWS_DEFAULT_REGION: "us-east-1"
-    steps:
-      - uses: actions/checkout@v3
-      - name: Apply Terraform
+      - name: Upload plan for review (optional)
+        uses: actions/upload-artifact@v3
+        with:
+          name: terraform-plan
+          path: planfile
+        when: needs.create-plan.outputs == 'success' 
+
+      - name: Apply Terraform changes (manual approval required)
+        id: apply-changes
         run: terraform apply -input=false planfile
-        if: github.event.inputs.apply == 'true'
+        needs: [ validate, create-plan ] 
+        when: github.event.inputs.apply == 'true'  
 
-  destroy:
-    runs-on: ubuntu-latest
-    env:
-      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY }}
-      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_KEY }}
-      AWS_DEFAULT_REGION: "us-east-1"
-    steps:
-      - uses: actions/checkout@v3
-      - name: Destroy Terraform
+      - name: Destroy Terraform resources (manual approval required)
+        id: destroy-resources
         run: terraform destroy --auto-approve
-        if: github.event.inputs.destroy == 'true'
+        when: github.event.inputs.destroy == 'true'  

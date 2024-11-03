@@ -8,19 +8,44 @@ variables {
   //more instace type
 }
 
-run "ami_tests" {
+run "server_1_tests" {
   command = plan
+
   assert {
-    condition     = module.ec2.ami == var.ami_amazon_linux_2023 || module.ec2.ami == var.ami_ubuntu_server_24_04 || module.ec2.ami == var.ami_ms_windows_server_2022
-    error_message = "Invalid or not a free AMI type!"
+    condition     = module.ec2.ami_1 == var.ami_amazon_linux_2023 || module.ec2.ami_1 == var.ami_ubuntu_server_24_04 || module.ec2.ami_1 == var.ami_ms_windows_server_2022
+    error_message = "Server 1: Invalid or not a free AMI type!"
+  }
+
+  assert {
+    condition     = module.ec2.instance_type_1 == var.instance_type
+    error_message = "Sever 1: Invalid or not a free instance type!"
   }
 }
 
-run "instance_type_tests" {
+run "server_2_tests" {
   command = plan
+
   assert {
-    condition     = module.ec2.instance_type == var.instance_type
-    error_message = "Invalid or not a free instance type!"
+    condition     = module.ec2.ami_2 == var.ami_amazon_linux_2023 || module.ec2.ami_2 == var.ami_ubuntu_server_24_04 || module.ec2.ami_2 == var.ami_ms_windows_server_2022
+    error_message = "Server 2: Invalid or not a free AMI type!"
+  }
+
+  assert {
+    condition     = module.ec2.instance_type_2 == var.instance_type
+    error_message = "Sever 2: Invalid or not a free instance type!"
   }
 }
 
+run "server_3_tests" {
+  command = plan
+
+  assert {
+    condition     = module.ec2.ami_3 == var.ami_amazon_linux_2023 || module.ec2.ami_3 == var.ami_ubuntu_server_24_04 || module.ec2.ami_3 == var.ami_ms_windows_server_2022
+    error_message = "Server 2: Invalid or not a free AMI type!"
+  }
+
+  assert {
+    condition     = module.ec2.instance_type_3 == var.instance_type
+    error_message = "Sever 2: Invalid or not a free instance type!"
+  }
+}

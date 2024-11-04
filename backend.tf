@@ -2,7 +2,7 @@ terraform {
   backend "s3" {
     bucket         = "b2111933-bucket"
     key            = "state"
-    region         = "us-east-1"
+    region         = var.default_region
     dynamodb_table = "b2111933-table"
   }
 }

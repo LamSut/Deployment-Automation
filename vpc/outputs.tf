@@ -1,3 +1,5 @@
+//for using vpc
+
 output "public_subnet" {
   value = aws_subnet.public_subnet.id
 }
@@ -9,11 +11,11 @@ output "security_group" {
 //for test vpc
 
 output "enable_dns_hostnames" {
-  value = aws_vpc.myvpc.enable_dns_hostnames
+  value = aws_vpc.my_vpc.enable_dns_hostnames
 }
 
 output "enable_dns_support" {
-  value = aws_vpc.myvpc.enable_dns_support
+  value = aws_vpc.my_vpc.enable_dns_support
 }
 
 // for test subnet
@@ -23,7 +25,7 @@ output "map_public_ip_on_launch" {
 }
 
 output "vpc_sm" {
-  value = tonumber(split("/", aws_vpc.myvpc.cidr_block)[1])
+  value = tonumber(split("/", aws_vpc.my_vpc.cidr_block)[1])
 }
 
 output "subnet_sm" {

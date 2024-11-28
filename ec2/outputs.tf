@@ -1,23 +1,23 @@
-output "ami_1" {
-  value = aws_instance.server_1.ami
+output "ami_amazon" {
+  value = aws_instance.amazon[*].ami
 }
 
-output "instance_type_1" {
-  value = aws_instance.server_1.instance_type
+output "instance_type_amazon" {
+  value = aws_instance.amazon[*].instance_type
 }
 
-output "ami_2" {
-  value = aws_instance.server_2.ami
+output "ami_ubuntu" {
+  value = aws_instance.ubuntu[*].ami
 }
 
-output "instance_type_2" {
-  value = aws_instance.server_2.instance_type
+output "instance_type_ubuntu" {
+  value = aws_instance.ubuntu[*].instance_type
 }
 
-output "ami_3" {
-  value = aws_instance.server_3.ami
+output "ami_windows" {
+  value = aws_instance.windows[*].ami
 }
 
-output "instance_type_3" {
-  value = aws_instance.server_3.instance_type
+output "instance_type_windows" {
+  value = aws_instance.windows[*].instance_type
 }

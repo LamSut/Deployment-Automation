@@ -5,7 +5,9 @@ variable "key_name" {
 
 variable "security_group" {}
 
-variable "subnet" {}
+variable "subnet1" {}
+
+variable "subnet2" {}
 
 variable "ami_free_amazon" {
   type    = string

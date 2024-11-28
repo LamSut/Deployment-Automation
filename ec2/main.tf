@@ -1,12 +1,12 @@
 resource "aws_instance" "amazon" {
-  count = 3
+  count = 1
 
   ami           = var.ami_free_amazon
   instance_type = var.instance_type_free
 
   key_name = var.key_name
 
-  subnet_id       = var.subnet
+  subnet_id       = var.subnet1
   security_groups = [var.security_group]
 
   tags = {
@@ -22,7 +22,7 @@ resource "aws_instance" "ubuntu" {
 
   key_name = var.key_name
 
-  subnet_id       = var.subnet
+  subnet_id       = var.subnet2
   security_groups = [var.security_group]
 
   tags = {
@@ -38,7 +38,7 @@ resource "aws_instance" "windows" {
 
   key_name = var.key_name
 
-  subnet_id       = var.subnet
+  subnet_id       = var.subnet1
   security_groups = [var.security_group]
 
   tags = {

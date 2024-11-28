@@ -33,14 +33,14 @@ run "ubuntu_tests" {
     condition = alltrue([
       for ami in module.ec2.ami_ubuntu : ami == var.ami_ubuntu_ubuntu4_04
     ])
-    error_message = "Amazon Linux Servers: Invalid or not a free AMI type!"
+    error_message = "Ubuntu Servers: Invalid or not a free AMI type!"
   }
 
   assert {
     condition = alltrue([
       for instance_type in module.ec2.instance_type_ubuntu : instance_type == var.instance_type
     ])
-    error_message = "Amazon Linux Servers: Invalid or not a free instance type!"
+    error_message = "Ubuntu Servers: Invalid or not a free instance type!"
   }
 }
 
@@ -51,13 +51,13 @@ run "windows_tests" {
     condition = alltrue([
       for ami in module.ec2.ami_windows : ami == var.ami_ms_windows_22
     ])
-    error_message = "Amazon Linux Servers: Invalid or not a free AMI type!"
+    error_message = "Windows Servers: Invalid or not a free AMI type!"
   }
 
   assert {
     condition = alltrue([
       for instance_type in module.ec2.instance_type_windows : instance_type == var.instance_type
     ])
-    error_message = "Amazon Linux Servers: Invalid or not a free instance type!"
+    error_message = "Window Servers: Invalid or not a free instance type!"
   }
 }

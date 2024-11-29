@@ -1,6 +1,6 @@
 variable "count_amazon" {
   type    = number
-  default = 1
+  default = 2
 }
 
 variable "count_ubuntu" {

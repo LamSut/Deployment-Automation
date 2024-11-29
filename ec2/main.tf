@@ -1,5 +1,5 @@
 resource "aws_instance" "amazon" {
-  count = var.count_amazon
+  count = 1
 
   ami           = var.ami_free_amazon
   instance_type = var.instance_type_free
@@ -15,7 +15,7 @@ resource "aws_instance" "amazon" {
 }
 
 resource "aws_instance" "ubuntu" {
-  count = var.count_ubuntu
+  count = 1
 
   ami           = var.ami_free_ubuntu
   instance_type = var.instance_type_free
@@ -31,7 +31,7 @@ resource "aws_instance" "ubuntu" {
 }
 
 resource "aws_instance" "windows" {
-  count = var.count_windows
+  count = 1
 
   ami           = var.ami_free_windows
   instance_type = var.instance_type_free

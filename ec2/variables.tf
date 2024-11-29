@@ -1,18 +1,3 @@
-variable "count_amazon" {
-  type    = number
-  default = 1
-}
-
-variable "count_ubuntu" {
-  type    = number
-  default = 1
-}
-
-variable "count_windows" {
-  type    = number
-  default = 1
-}
-
 variable "security_group" {}
 
 variable "subnet1" {}

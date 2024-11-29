@@ -1,3 +1,5 @@
+//for unit testing
+
 output "ami_amazon" {
   value = aws_instance.amazon[*].ami
 }
@@ -20,4 +22,33 @@ output "ami_windows" {
 
 output "instance_type_windows" {
   value = aws_instance.windows[*].instance_type
+}
+
+//for integration testing
+
+//amazon network
+output "subnet_amazon" {
+  value = aws_instance.amazon[*].subnet_id
+}
+
+output "sg_amazon" {
+  value = aws_instance.amazon[*].security_groups
+}
+
+//ubuntu network
+output "subnet_ubuntu" {
+  value = aws_instance.ubuntu[*].subnet_id
+}
+
+output "sg_ubuntu" {
+  value = aws_instance.ubuntu[*].security_groups
+}
+
+//amazon network
+output "subnet_windows" {
+  value = aws_instance.windows[*].subnet_id
+}
+
+output "sg_windows" {
+  value = aws_instance.windows[*].security_groups
 }

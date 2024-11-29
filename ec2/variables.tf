@@ -1,6 +1,16 @@
-variable "key_name" {
-  type    = string
-  default = "lamsutdeptraivcl"
+variable "count_amazon" {
+  type    = number
+  default = 1
+}
+
+variable "count_ubuntu" {
+  type    = number
+  default = 1
+}
+
+variable "count_windows" {
+  type    = number
+  default = 1
 }
 
 variable "security_group" {}
@@ -8,6 +18,11 @@ variable "security_group" {}
 variable "subnet1" {}
 
 variable "subnet2" {}
+
+variable "key_name" {
+  type    = string
+  default = "lamsutdeptraivcl"
+}
 
 variable "ami_free_amazon" {
   type    = string

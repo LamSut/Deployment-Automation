@@ -9,6 +9,7 @@ resource "aws_vpc" "my_vpc" {
   }
 }
 
+//vpc gw
 resource "aws_internet_gateway" "my_vpc_igw" {
   vpc_id = aws_vpc.my_vpc.id
 
@@ -22,7 +23,7 @@ resource "aws_subnet" "public_subnet1" {
   vpc_id                  = aws_vpc.my_vpc.id
   cidr_block              = var.subnet1_cidr
   map_public_ip_on_launch = true
-  availability_zone       = "us-east-1a"
+  availability_zone       = var.availability_zone
 
   tags = {
     "Name" = "public_subnet1"
@@ -33,7 +34,7 @@ resource "aws_route_table" "public_subnet_route_table1" {
   vpc_id = aws_vpc.my_vpc.id
 
   route {
-    cidr_block = "0.0.0.0/0"
+    cidr_block = var.default_cidr
     gateway_id = aws_internet_gateway.my_vpc_igw.id
   }
 
@@ -52,7 +53,7 @@ resource "aws_subnet" "public_subnet2" {
   vpc_id                  = aws_vpc.my_vpc.id
   cidr_block              = var.subnet2_cidr
   map_public_ip_on_launch = true
-  availability_zone       = "us-east-1a"
+  availability_zone       = var.availability_zone
 
   tags = {
     "Name" = "public_subnet2"
@@ -63,7 +64,7 @@ resource "aws_route_table" "public_subnet_route_table2" {
   vpc_id = aws_vpc.my_vpc.id
 
   route {
-    cidr_block = "0.0.0.0/0"
+    cidr_block = var.default_cidr
     gateway_id = aws_internet_gateway.my_vpc_igw.id
   }
 
@@ -87,27 +88,27 @@ resource "aws_security_group" "security_group" {
     from_port   = 22 //for SSH
     to_port     = 22
     protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
+    cidr_blocks = [var.default_cidr]
   }
 
   ingress {
     from_port   = 3389 //for Windows Remote Connection
     to_port     = 3389
     protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
+    cidr_blocks = [var.default_cidr]
   }
 
   ingress {
     from_port   = -1
     to_port     = -1
     protocol    = "icmp"
-    cidr_blocks = ["0.0.0.0/0"]
+    cidr_blocks = [var.default_cidr]
   }
 
   egress {
     from_port   = 0
     to_port     = 0
     protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
+    cidr_blocks = [var.default_cidr]
   }
 }

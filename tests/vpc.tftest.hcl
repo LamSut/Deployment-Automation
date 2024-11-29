@@ -40,3 +40,24 @@ run "subnet2_tests" {
   }
 }
 
+run "vpc_integration_test" {
+  command = apply
+
+  // gateway test
+  assert {
+    condition     = module.vpc.gw_vpc_id == module.vpc.vpc
+    error_message = "Must attach this gateway to VPC!"
+  }
+
+  //subnet1 association test
+  assert {
+    condition     = module.vpc.public_subnet1 == module.vpc.association_subnet1
+    error_message = "Must attach this subnet to a route table!"
+  }
+
+  //subnet2 association test
+  assert {
+    condition     = module.vpc.public_subnet2 == module.vpc.association_subnet2
+    error_message = "Must attach this subnet to a route table!"
+  }
+}

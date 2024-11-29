@@ -1,7 +1,4 @@
 //for using vpc
-output "vpc" {
-  value = aws_vpc.my_vpc.id
-}
 
 output "public_subnet1" {
   value = aws_subnet.public_subnet1.id
@@ -45,17 +42,75 @@ output "subnet2_sm" {
 
 // for integration testing
 
+//vpc id
+output "vpc_id" {
+  value = aws_vpc.my_vpc.id
+}
+
+//gateway id
+output "gw" {
+  value = aws_internet_gateway.my_vpc_igw.id
+}
+
 //gateway attach to vpc
 output "gw_vpc_id" {
   value = aws_internet_gateway.my_vpc_igw.vpc_id
 }
 
+//subnet1 vpc id
+output "subnet1_vpc_id" {
+  value = aws_subnet.public_subnet1.vpc_id
+}
+
+//route_table1 id
+output "route_table1" {
+  value = aws_route_table.public_subnet_route_table1.id
+}
+
+//route_table1 vpc id
+output "route_table1_vpc_id" {
+  value = aws_route_table.public_subnet_route_table1.vpc_id
+}
+
+//route_table1 gw id
+output "route_table1_gw_id" {
+  value = [for r in aws_route_table.public_subnet_route_table1.route : r.gateway_id]
+}
+
 //subnet1 route table association
+output "association_route_table1" {
+  value = aws_route_table_association.public_subnet_route_table1.route_table_id
+}
+
 output "association_subnet1" {
   value = aws_route_table_association.public_subnet_route_table1.subnet_id
 }
 
+//subnet2 vpc id
+output "subnet2_vpc_id" {
+  value = aws_subnet.public_subnet2.vpc_id
+}
+
+//route_table2 id
+output "route_table2" {
+  value = aws_route_table.public_subnet_route_table2.id
+}
+
+//route_table2 vpc id
+output "route_table2_vpc_id" {
+  value = aws_route_table.public_subnet_route_table2.vpc_id
+}
+
+//route_table2 gw id
+output "route_table2_gw_id" {
+  value = [for r in aws_route_table.public_subnet_route_table2.route : r.gateway_id]
+}
+
 //subnet2 route table association
+output "association_route_table2" {
+  value = aws_route_table_association.public_subnet_route_table2.route_table_id
+}
+
 output "association_subnet2" {
   value = aws_route_table_association.public_subnet_route_table2.subnet_id
 }

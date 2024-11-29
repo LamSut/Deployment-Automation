@@ -6,8 +6,8 @@ resource "aws_instance" "amazon" {
 
   key_name = var.key_name
 
-  subnet_id       = var.subnet1
-  security_groups = [var.security_group]
+  subnet_id              = var.subnet1
+  vpc_security_group_ids = [var.security_group]
 
   tags = {
     Name = "B2111933 Amazon Linux"
@@ -22,8 +22,8 @@ resource "aws_instance" "ubuntu" {
 
   key_name = var.key_name
 
-  subnet_id       = var.subnet1
-  security_groups = [var.security_group]
+  subnet_id              = var.subnet1
+  vpc_security_group_ids = [var.security_group]
 
   tags = {
     Name = "B2111933 Ubuntu"
@@ -38,8 +38,8 @@ resource "aws_instance" "windows" {
 
   key_name = var.key_name
 
-  subnet_id       = var.subnet1
-  security_groups = [var.security_group]
+  subnet_id              = var.subnet1
+  vpc_security_group_ids = [var.security_group]
 
   tags = {
     Name = "B2111933 Windows"

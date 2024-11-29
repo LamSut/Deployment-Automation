@@ -32,7 +32,7 @@ output "subnet_amazon" {
 }
 
 output "sg_amazon" {
-  value = aws_instance.amazon[*].security_groups
+  value = aws_instance.amazon[*].vpc_security_group_ids
 }
 
 //ubuntu network
@@ -41,7 +41,7 @@ output "subnet_ubuntu" {
 }
 
 output "sg_ubuntu" {
-  value = aws_instance.ubuntu[*].security_groups
+  value = aws_instance.ubuntu[*].vpc_security_group_ids
 }
 
 //amazon network
@@ -50,5 +50,5 @@ output "subnet_windows" {
 }
 
 output "sg_windows" {
-  value = aws_instance.windows[*].security_groups
+  value = aws_instance.windows[*].vpc_security_group_ids
 }

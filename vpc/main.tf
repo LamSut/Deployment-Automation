@@ -84,15 +84,22 @@ resource "aws_security_group" "security_group" {
   name        = "my_security_group"
   description = "Public Security Group"
 
-  ingress {
-    from_port   = 22 //for SSH
+  ingress { //for HTTP
+    from_port   = 80
+    to_port     = 80
+    protocol    = "tcp"
+    cidr_blocks = [var.default_cidr]
+  }
+
+  ingress { //for SSH
+    from_port   = 22
     to_port     = 22
     protocol    = "tcp"
     cidr_blocks = [var.default_cidr]
   }
 
-  ingress {
-    from_port   = 3389 //for Windows Remote Connection
+  ingress { //for Windows Remote Connection
+    from_port   = 3389
     to_port     = 3389
     protocol    = "tcp"
     cidr_blocks = [var.default_cidr]

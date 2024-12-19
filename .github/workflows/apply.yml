@@ -1,4 +1,4 @@
-name: Apply (Manual)
+name: Manual Apply #To prevent using a stale plan file, please run the Integration workflow again.
 
 on:
   workflow_dispatch:

@@ -1,4 +1,4 @@
-name: Build - Test - Plan
+name: Build - Test - Plan (Auto)
 
 on:
   push:

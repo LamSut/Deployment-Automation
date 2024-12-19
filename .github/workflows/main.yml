@@ -5,6 +5,7 @@ on:
     branches: [ main ]
   pull_request:
     branches: [ main ]
+  workflow_dispatch: # Allows manual trigger for the entire workflow
 
 jobs:
   validate:
@@ -92,13 +93,10 @@ jobs:
       - name: Apply Terraform
         run: terraform apply -input=false planfile
 
-    if: workflow_dispatch
-
   destroy:
     name: Terraform Destroy
     runs-on: ubuntu-latest
 
-    if: workflow_dispatch
     env:
       AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY }}
       AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_KEY }}

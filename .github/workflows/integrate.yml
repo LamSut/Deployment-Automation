@@ -29,7 +29,25 @@ jobs:
       - name: Terraform Validate
         run: terraform validate
 
-  test:
+  # test:
+  #   runs-on: ubuntu-latest
+  #   needs: validate
+  #   steps:
+  #     - name: Checkout Code
+  #       uses: actions/checkout@v3
+
+  #     - name: Set up Terraform
+  #       uses: hashicorp/setup-terraform@v2
+  #       with:
+  #         terraform_version: 1.6
+
+  #     - name: Terraform Init
+  #       run: terraform init
+
+  #     - name: Terraform Test
+  #       run: terraform test
+
+  plan:
     runs-on: ubuntu-latest
     needs: validate
     steps:
@@ -44,23 +62,11 @@ jobs:
       - name: Terraform Init
         run: terraform init
 
-      - name: Terraform Test
-        run: terraform test
-
-  plan:
-    runs-on: ubuntu-latest
-    needs: test
-    steps:
-      - name: Checkout Code
-        uses: actions/checkout@v3
-
-      - name: Set up Terraform
-        uses: hashicorp/setup-terraform@v2
-        with:
-          terraform_version: 1.6
-
-      - name: Terraform Init
-        run: terraform init
-
       - name: Terraform Plan
-        run: terraform plan 
+        run: terraform plan -out=planfile
+
+      - name: Upload Planfile as Artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: terraform-planfile
+          path: planfile

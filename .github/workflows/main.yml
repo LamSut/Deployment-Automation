@@ -2,122 +2,108 @@ name: Terraform CI/CD
 
 on:
   push:
-    branches: [ main ]
+    branches:
+      - main
   pull_request:
-    branches: [ main ]
-  workflow_dispatch: # Allows manual trigger for the entire workflow
+
+env:
+  TF_VAR_gitlab_token: ${{ secrets.GITLAB_ACCESS_TOKEN }}
+  AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY }}
+  AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_KEY }}
+  AWS_DEFAULT_REGION: "us-east-1"
 
 jobs:
   validate:
-    name: Terraform Validate
     runs-on: ubuntu-latest
-    
-    env:
-      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY }}
-      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_KEY }}
-      AWS_DEFAULT_REGION: "us-east-1"
-    
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout Code
+        uses: actions/checkout@v3
 
-      - name: Install Terraform
+      - name: Set up Terraform
         uses: hashicorp/setup-terraform@v2
+        with:
+          terraform_version: 1.6
 
-      - name: Initialize Terraform
+      - name: Terraform Init
         run: terraform init
 
       - name: Terraform Validate
         run: terraform validate
 
   test:
-    name: Terraform Test
     runs-on: ubuntu-latest
-
+    needs: validate
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout Code
+        uses: actions/checkout@v3
 
-      - name: Install Terraform
+      - name: Set up Terraform
         uses: hashicorp/setup-terraform@v2
+        with:
+          terraform_version: 1.6
 
-      - name: Terraform Test (Linting and Static Analysis)
-        run: terraform fmt -check
+      - name: Terraform Init
+        run: terraform init
+
+      - name: Terraform Test
+        run: terraform test
 
   plan:
-    name: Terraform Plan
     runs-on: ubuntu-latest
-
-    env:
-      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY }}
-      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_KEY }}
-      AWS_DEFAULT_REGION: "us-east-1"
-
+    needs: test
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout Code
+        uses: actions/checkout@v3
 
-      - name: Use Terraform Cache
-        uses: actions/cache@v3
-        with:
-          path: ~/.terraform
-          key: ${{ runner.os }}-terraform-${{ hashFiles('**/.terraform.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-terraform-
-
-      - name: Install Terraform
+      - name: Set up Terraform
         uses: hashicorp/setup-terraform@v2
+        with:
+          terraform_version: 1.6
 
-      - name: Initialize Terraform
+      - name: Terraform Init
         run: terraform init
 
       - name: Terraform Plan
         run: terraform plan -out=planfile
 
-      - name: Upload Plan
+      - name: Upload Planfile
         uses: actions/upload-artifact@v3
         with:
           name: planfile
           path: planfile
 
   apply:
-    name: Terraform Apply
     runs-on: ubuntu-latest
-
     needs: plan
-    env:
-      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY }}
-      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_KEY }}
-      AWS_DEFAULT_REGION: "us-east-1"
-
+    if: github.event_name == 'workflow_dispatch'
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout Code
+        uses: actions/checkout@v3
 
-      - name: Download Plan
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@v2
+        with:
+          terraform_version: 1.6
+
+      - name: Download Planfile
         uses: actions/download-artifact@v3
         with:
           name: planfile
 
-      - name: Install Terraform
-        uses: hashicorp/setup-terraform@v2
-
-      - name: Apply Terraform
+      - name: Terraform Apply
         run: terraform apply -input=false planfile
 
   destroy:
-    name: Terraform Destroy
     runs-on: ubuntu-latest
-
-    env:
-      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY }}
-      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_KEY }}
-      AWS_DEFAULT_REGION: "us-east-1"
-
+    if: github.event_name == 'workflow_dispatch'
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout Code
+        uses: actions/checkout@v3
 
-      - name: Install Terraform
+      - name: Set up Terraform
         uses: hashicorp/setup-terraform@v2
+        with:
+          terraform_version: 1.6
 
-      - name: Initialize Terraform
-        run: terraform init
-
-      - name: Destroy Terraform Resources
-        run: terraform destroy -auto-approve
+      - name: Terraform Destroy
+        run: terraform destroy --auto-approve

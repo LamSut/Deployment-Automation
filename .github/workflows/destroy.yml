@@ -20,11 +20,14 @@ jobs:
         with:
           terraform_version: 1.6
 
+      - name: Download Planfile Artifact
+        uses: dawidd6/action-download-artifact@v7
+        with:
+          workflow: integrate.yml
+          name: terraform-planfile
+
       - name: Terraform Init
         run: terraform init
-
-      - name: Terraform Plan Destroy
-        run: terraform plan -destroy
 
       - name: Terraform Destroy
         run: terraform destroy --auto-approve

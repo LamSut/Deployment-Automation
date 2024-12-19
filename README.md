@@ -1,5 +1,5 @@
 # Deployment Automation 
-Automated AWS infrastructure provisioning using Terraform with GitHub Actions (migrated from GitLab CI/CD):  
+Automated AWS infrastructure provisioning using Terraform with GitHub Actions:  
 * AWS services: IAM, EC2, S3, DynamoDB,...
 * Terraform configuration for AWS Free Tier resources.
 * GitLab CI/CD (GitHub Actions) for automated build, test, review and deploy.

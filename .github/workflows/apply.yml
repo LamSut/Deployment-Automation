@@ -11,7 +11,7 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Download Planfile from S3
-        run: aws s3 cp s3://${{ secrets.S3_BUCKET }}/planfile planfile
+        run: aws s3 cp s3://${{ secrets.AWS_S3 }}/planfile planfile
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_KEY }}

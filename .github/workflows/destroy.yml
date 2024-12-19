@@ -1,4 +1,4 @@
-name: Destroy (Manual)
+name: Manual Destroy #To prevent using a stale plan file, please run the Integration workflow again.
 
 on:
   workflow_dispatch:

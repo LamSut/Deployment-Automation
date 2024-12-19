@@ -21,8 +21,9 @@ jobs:
           terraform_version: 1.6
 
       - name: Download Planfile Artifact
-        uses: actions/download-artifact@v3
+        uses: dawidd6/action-download-artifact@v7
         with:
+          workflow: integrate.yml
           name: terraform-planfile
 
       - name: Terraform Init

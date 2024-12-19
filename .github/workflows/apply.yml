@@ -1,4 +1,4 @@
-name: Apply
+name: Apply (Manual)
 
 on:
   workflow_dispatch:

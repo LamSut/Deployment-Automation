@@ -7,4 +7,4 @@ Automated AWS infrastructure provisioning using Terraform with GitHub Actions:
 
 You can review the GitLab CI/CD version of this project: [Deployment Automation](https://gitlab.com/LamSut/deployment-automation)  
 
-Refer to this document for additional details: [B2111933 - Specialized Topics](https://github.com/LamSut/Deployment-Automation/blob/main/Truong%20Dang%20Truc%20Lam%20-%20B2111933%20-%20NLCN%20-%20BC.pdf)
+Refer to this document for additional details: [B2111933 - Specialized Topics](https://github.com/LamSut/Deployment-Automation/blob/main/B2111933%20-%20Specialized%20Topics.pdf)
